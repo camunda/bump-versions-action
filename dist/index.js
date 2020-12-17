@@ -12770,7 +12770,7 @@ const bumpVersions = async ({ files, sliceVersion, path, ignoredFiles, newVersio
     void github.pulls.create({
         base: "master",
         body: `- Bumps versions from ${oldVersion} to ${newVersion}
-  - Ignored files: ${ignoredFiles.join(", ")}
+  - Searched files: ${files.join(", ")}
 - ...`,
         head: branchName,
         owner,
