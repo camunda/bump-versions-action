@@ -81,7 +81,7 @@ const bumpVersions = async ({
 
   const ignore = ignoredFiles.map((ignoredFile) => `./${repo}/${ignoredFile}`);
 
-  const oldVersionEscaped = oldVersion.replace(".", ".");
+  const oldVersionEscaped = oldVersion.replace(".", "\\.");
 
   replace.sync({
     files: `./${repo}${path}/**/*`,
