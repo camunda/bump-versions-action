@@ -12703,12 +12703,16 @@ __webpack_require__.r(__webpack_exports__);
 const replace = __webpack_require__(5983);
 const run = async () => {
     const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github_token", { required: true });
+    const sliceVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("sliceVersion", { required: false });
+    const files = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("files", { required: false });
     const path = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("path", { required: false }) || "";
-    const ignoredFiles = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("ignoredFiles", { required: true }).split(",");
+    const ignoredFiles = ((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("ignoredFiles", { required: false }) || "").split(",");
     const oldVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("oldVersion", { required: true });
     const newVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("newVersion", { required: true });
     try {
         await bumpVersions({
+            files,
+            sliceVersion,
             path,
             ignoredFiles,
             newVersion,
@@ -12722,7 +12726,7 @@ const run = async () => {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(error.message);
     }
 };
-const bumpVersions = async ({ path, ignoredFiles, newVersion, oldVersion, payload: { repository: { name: repo, owner: { login: owner }, }, }, token, }) => {
+const bumpVersions = async ({ files, sliceVersion, path, ignoredFiles, newVersion, oldVersion, payload: { repository: { name: repo, owner: { login: owner }, }, }, token, }) => {
     await (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)("git", [
         "clone",
         `https://x-access-token:${token}@github.com/${owner}/${repo}.git`,
@@ -12736,18 +12740,24 @@ const bumpVersions = async ({ path, ignoredFiles, newVersion, oldVersion, payloa
     await (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)("git", ["config", "--global", "user.name", "github-actions[bot]"]);
     const ignore = ignoredFiles.map((ignoredFile) => `./${repo}/${ignoredFile}`);
     const oldVersionEscaped = oldVersion.replace(".", "\\.");
+    const filesReplace = files
+        ? files.split(",").map((file) => `./${repo}${path}/${file}`)
+        : `./${repo}${path}/**/*`;
     replace.sync({
-        files: `./${repo}${path}/**/*`,
+        files: filesReplace,
         from: new RegExp(`${oldVersionEscaped}`, "g"),
         ignore,
         to: newVersion,
     });
-    replace.sync({
-        files: `./${repo}${path}/**/*`,
-        from: new RegExp(`${oldVersionEscaped.slice(0, -2)}`, "g"),
-        ignore,
-        to: newVersion.slice(0, -2),
-    });
+    const sliceVersionAsNumber = Number(sliceVersion || -2);
+    if (sliceVersionAsNumber !== 0) {
+        replace.sync({
+            files: filesReplace,
+            from: new RegExp(`${oldVersionEscaped.slice(0, sliceVersionAsNumber)}`, "g"),
+            ignore,
+            to: newVersion.slice(0, sliceVersionAsNumber),
+        });
+    }
     const git = async (...args) => {
         await (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)("git", args, { cwd: repo });
     };

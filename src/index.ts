@@ -26,13 +26,19 @@ const replace = require("replace-in-file");
 const run = async () => {
   const token = getInput("github_token", { required: true });
 
+  const sliceVersion = getInput("sliceVersion", { required: false });
+  const files = getInput("files", { required: false });
   const path = getInput("path", { required: false }) || "";
-  const ignoredFiles = getInput("ignoredFiles", { required: true }).split(",");
+  const ignoredFiles = (
+    getInput("ignoredFiles", { required: false }) || ""
+  ).split(",");
   const oldVersion = getInput("oldVersion", { required: true });
   const newVersion = getInput("newVersion", { required: true });
 
   try {
     await bumpVersions({
+      files,
+      sliceVersion,
       path,
       ignoredFiles,
       newVersion,
@@ -47,6 +53,8 @@ const run = async () => {
 };
 
 const bumpVersions = async ({
+  files,
+  sliceVersion,
   path,
   ignoredFiles,
   newVersion,
@@ -59,6 +67,8 @@ const bumpVersions = async ({
   },
   token,
 }: {
+  files: string;
+  sliceVersion: string;
   path: string;
   ignoredFiles: string[];
   newVersion: string;
@@ -83,19 +93,28 @@ const bumpVersions = async ({
 
   const oldVersionEscaped = oldVersion.replace(".", "\\.");
 
+  const filesReplace = files
+    ? files.split(",").map((file) => `./${repo}${path}/${file}`)
+    : `./${repo}${path}/**/*`;
   replace.sync({
-    files: `./${repo}${path}/**/*`,
+    files: filesReplace,
     from: new RegExp(`${oldVersionEscaped}`, "g"),
     ignore,
     to: newVersion,
   });
 
-  replace.sync({
-    files: `./${repo}${path}/**/*`,
-    from: new RegExp(`${oldVersionEscaped.slice(0, -2)}`, "g"),
-    ignore,
-    to: newVersion.slice(0, -2),
-  });
+  const sliceVersionAsNumber = Number(sliceVersion || -2);
+  if (sliceVersionAsNumber !== 0) {
+    replace.sync({
+      files: filesReplace,
+      from: new RegExp(
+        `${oldVersionEscaped.slice(0, sliceVersionAsNumber)}`,
+        "g",
+      ),
+      ignore,
+      to: newVersion.slice(0, sliceVersionAsNumber),
+    });
+  }
 
   const git = async (...args: string[]) => {
     await exec("git", args, { cwd: repo });
