@@ -1,0 +1,13 @@
+name: Bump versions
+author: Tassilo Weidner
+description: Bumps versions via search and replace
+inputs:
+  github_token:
+    description: Token for the GitHub API.
+    required: true
+runs:
+  using: node12
+  main: dist/index.js
+branding:
+  icon: arrow-left-circle
+  color: purple
