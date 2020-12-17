@@ -26,12 +26,14 @@ const replace = require("replace-in-file");
 const run = async () => {
   const token = getInput("github_token", { required: true });
 
+  const path = getInput("path", { required: false }) || "";
   const ignoredFiles = getInput("ignoredFiles", { required: true }).split(",");
   const oldVersion = getInput("oldVersion", { required: true });
   const newVersion = getInput("newVersion", { required: true });
 
   try {
     await bumpVersions({
+      path,
       ignoredFiles,
       newVersion,
       oldVersion,
@@ -45,6 +47,7 @@ const run = async () => {
 };
 
 const bumpVersions = async ({
+  path,
   ignoredFiles,
   newVersion,
   oldVersion,
@@ -56,6 +59,7 @@ const bumpVersions = async ({
   },
   token,
 }: {
+  path: string;
   ignoredFiles: string[];
   newVersion: string;
   oldVersion: string;
@@ -78,14 +82,14 @@ const bumpVersions = async ({
   const ignore = ignoredFiles.map((ignoredFile) => `./${repo}/${ignoredFile}`);
 
   replace.sync({
-    files: `./${repo}/**/*`,
+    files: `./${repo}${path}/**/*`,
     from: new RegExp(`${oldVersion}`, "g"),
     ignore,
     to: newVersion,
   });
 
   replace.sync({
-    files: `./${repo}/**/*`,
+    files: `./${repo}${path}/**/*`,
     from: new RegExp(`${oldVersion.slice(0, -2)}`, "g"),
     ignore,
     to: newVersion.slice(0, -2),
