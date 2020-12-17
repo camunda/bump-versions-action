@@ -89,17 +89,15 @@ const bumpVersions = async ({
   ]);
   await exec("git", ["config", "--global", "user.name", "github-actions[bot]"]);
 
-  const ignore = ignoredFiles.map((ignoredFile) => `./${repo}/${ignoredFile}`);
-
   const oldVersionEscaped = oldVersion.replace(".", "\\.");
 
   const filesReplace = files
-    ? files.split(",").map((file) => `./${repo}${path}/${file}`)
+    ? files.split(",").map(file => `./${repo}${path}/${file}`)
     : `./${repo}${path}/**/*`;
   replace.sync({
     files: filesReplace,
     from: new RegExp(`${oldVersionEscaped}`, "g"),
-    ignore,
+    ignore: ignoredFiles,
     to: newVersion,
   });
 
@@ -111,7 +109,7 @@ const bumpVersions = async ({
         `${oldVersionEscaped.slice(0, sliceVersionAsNumber)}`,
         "g",
       ),
-      ignore,
+      ignore: ignoredFiles,
       to: newVersion.slice(0, sliceVersionAsNumber),
     });
   }
