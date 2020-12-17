@@ -12704,9 +12704,9 @@ const replace = __webpack_require__(5983);
 const run = async () => {
     const token = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("github_token", { required: true });
     const sliceVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("sliceVersion", { required: false });
-    const files = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("files", { required: false });
-    const path = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("path", { required: false }) || "";
-    const ignoredFiles = ((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("ignoredFiles", { required: false }) || "").split(",");
+    const files = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("files", { required: false }).split(",");
+    const path = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("path", { required: false });
+    const ignoredFiles = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("ignoredFiles", { required: false }).split(",");
     const oldVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("oldVersion", { required: true });
     const newVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("newVersion", { required: true });
     try {
@@ -12739,8 +12739,8 @@ const bumpVersions = async ({ files, sliceVersion, path, ignoredFiles, newVersio
     ]);
     await (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)("git", ["config", "--global", "user.name", "github-actions[bot]"]);
     const oldVersionEscaped = oldVersion.replace(".", "\\.");
-    const filesReplace = files
-        ? files.split(",").map(file => `./${repo}${path}/${file}`)
+    const filesReplace = files.length > 0
+        ? files.map((file) => `./${repo}${path}/${file}`)
         : `./${repo}${path}/**/*`;
     replace.sync({
         files: filesReplace,

@@ -27,11 +27,9 @@ const run = async () => {
   const token = getInput("github_token", { required: true });
 
   const sliceVersion = getInput("sliceVersion", { required: false });
-  const files = getInput("files", { required: false });
-  const path = getInput("path", { required: false }) || "";
-  const ignoredFiles = (
-    getInput("ignoredFiles", { required: false }) || ""
-  ).split(",");
+  const files = getInput("files", { required: false }).split(",");
+  const path = getInput("path", { required: false });
+  const ignoredFiles = getInput("ignoredFiles", { required: false }).split(",");
   const oldVersion = getInput("oldVersion", { required: true });
   const newVersion = getInput("newVersion", { required: true });
 
@@ -67,7 +65,7 @@ const bumpVersions = async ({
   },
   token,
 }: {
-  files: string;
+  files: string[];
   sliceVersion: string;
   path: string;
   ignoredFiles: string[];
@@ -91,9 +89,10 @@ const bumpVersions = async ({
 
   const oldVersionEscaped = oldVersion.replace(".", "\\.");
 
-  const filesReplace = files
-    ? files.split(",").map(file => `./${repo}${path}/${file}`)
-    : `./${repo}${path}/**/*`;
+  const filesReplace =
+    files.length > 0
+      ? files.map((file) => `./${repo}${path}/${file}`)
+      : `./${repo}${path}/**/*`;
   replace.sync({
     files: filesReplace,
     from: new RegExp(`${oldVersionEscaped}`, "g"),
