@@ -12735,15 +12735,16 @@ const bumpVersions = async ({ path, ignoredFiles, newVersion, oldVersion, payloa
     ]);
     await (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)("git", ["config", "--global", "user.name", "github-actions[bot]"]);
     const ignore = ignoredFiles.map((ignoredFile) => `./${repo}/${ignoredFile}`);
+    const oldVersionEscaped = oldVersion.replace(".", ".");
     replace.sync({
         files: `./${repo}${path}/**/*`,
-        from: new RegExp(`${oldVersion}`, "g"),
+        from: new RegExp(`${oldVersionEscaped}`, "g"),
         ignore,
         to: newVersion,
     });
     replace.sync({
         files: `./${repo}${path}/**/*`,
-        from: new RegExp(`${oldVersion.slice(0, -2)}`, "g"),
+        from: new RegExp(`${oldVersionEscaped.slice(0, -2)}`, "g"),
         ignore,
         to: newVersion.slice(0, -2),
     });
