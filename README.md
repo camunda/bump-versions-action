@@ -17,10 +17,6 @@ on:
         description: 'New Version (replace)'
         required: true
         default: '7.X.0'
-      ignoredFiles:
-        description: 'Files to ignore (comma separated)'
-        required: true
-        default: 'README.md,**/package-lock.json'
 
 jobs:
   bump-versions:
@@ -28,12 +24,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Bump versions
-        uses: camunda/bump-versions-action@v1.2
+        uses: camunda/bump-versions-action@v1.7
         with:
           path: "/examples"
+          files: "**/package.json"
+          sliceVersion: -2 # When entering "7.15.0" as new version also searches for occurrences of "7.15"
           oldVersion: ${{ github.event.inputs.oldVersion }}
           newVersion: ${{ github.event.inputs.newVersion }}
-          ignoredFiles: ${{ github.event.inputs.ignoredFiles }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
